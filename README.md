@@ -27,5 +27,5 @@ This project implements a stopwatch with two modes: increment and countdown, usi
     - Adjust seconds (increment/decrement)
 - **Buzzer**: Sounds when the countdown reaches zero.
 - **LED Indicators**: 
-  - Red LED (PD4) for increment mode
-  - Yellow LED (PD5) for countdown mode
+  - Red LED for increment mode
+  - Yellow LED for countdown mode
