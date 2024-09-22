@@ -27,7 +27,6 @@ unsigned char seconds = 0;
 unsigned char minutes = 0;
 unsigned char hours = 0;
 unsigned char timer1_flag = 0;
-unsigned char stop_buzzer_flag = 0;
 
 /**********************         function prototypes         **********************/
 
@@ -49,7 +48,6 @@ void decrement_minutes(void);
 int main(void) {
 
 	unsigned char count_mode = COUNT_UP;
-	unsigned char buzzer_on_flag = 0;
 	// buttons flags
 	unsigned char hours_inc_flag = 1, hours_dec_flag = 1, min_inc_flag = 1,
 			min_dec_flag = 1, sec_inc_flag = 1, sec_dec_flag = 1;
@@ -95,10 +93,6 @@ int main(void) {
 	DDRD |= (1 << BUZZER);
 	// turn off buzzer
 	PORTD &= ~(1 << BUZZER);
-	// Configure PA6 as output pin
-	DDRA &= ~(1 << STOP_BUZZER);
-	// Activate the internal pull up resistor at PA6
-	PORTA |= (1 << STOP_BUZZER);
 
 	for (;;) {
 
@@ -153,12 +147,6 @@ int main(void) {
 				increment_seconds();
 			} else {
 				decrement_seconds();
-				if ((!seconds) && (!minutes) && (!hours)
-						&& (!stop_buzzer_flag)) {
-					buzzer_on_flag = 1;
-				} else {
-					buzzer_on_flag = 0;
-				}
 			}
 			// reset flag value to 0 to not enter here until the interrupt occurs again
 			timer1_flag = 0;
@@ -166,7 +154,6 @@ int main(void) {
 
 		// check if the toggle mode button pressed
 		if (!(PINB & (1 << TOGGLE_BT))) {
-			stop_buzzer_flag = 0;
 			if (toggle_flag) {
 				// toggle mode
 				count_mode ^= 1;
@@ -268,13 +255,9 @@ int main(void) {
 			sec_dec_flag = 1;
 		}
 
-		// check if stop buzzer button pressed
-		if (!(PINA & (1 << STOP_BUZZER))) {
-			stop_buzzer_flag = 1;
-		}
-
 		// check if count down reaches zero
-		if (buzzer_on_flag && !stop_buzzer_flag) {
+		if ((!seconds) && (!minutes) && (!hours)
+				&& (count_mode == COUNT_DOWN)) {
 			// turn on buzzer
 			PORTD |= (1 << BUZZER);
 		} else {
@@ -284,7 +267,6 @@ int main(void) {
 
 	}
 
-	return 0;
 }
 
 /*
@@ -380,7 +362,6 @@ void INT1_INIT(void) {
 ISR(INT1_vect) {
 	// No clock, stop counter
 	TCCR1B &= ~0X07;
-	stop_buzzer_flag = 0;
 }
 
 /* External INT2 enable and configuration function */
